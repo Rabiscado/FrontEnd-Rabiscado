@@ -1,0 +1,32 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  - homologing
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  Repository: projetil/rabiscado
+steps:
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'Docker Hub'
+      repository: '$(Repository)'
+      command: 'buildAndPush'
+      Dockerfile: '**/Dockerfile'
+      tags: '$(Build.BuildNumber),latest'
+
+  - task: AzureRmWebAppDeployment@4
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: 'Azure Rabiscado subscription(1ce9f9a5-c1e2-4090-b6fa-bb4f9428a9e0)'
+      appType: 'webAppContainer'
+      WebAppName: 'rabiscado-front-v1'
+      DockerNamespace: 'index.docker.io'
+      DockerRepository: '$(Repository)'
+      DockerImageTag: '$(Build.BuildNumber)'
+     
